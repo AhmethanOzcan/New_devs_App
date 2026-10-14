@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Env files with secrets
+.env.local
+backend/.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
