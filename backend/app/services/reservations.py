@@ -36,11 +36,9 @@ async def calculate_total_revenue(property_id: str, tenant_id: str) -> Dict[str,
     Aggregates revenue from database.
     """
     try:
-        # Import database pool
-        from app.core.database_pool import DatabasePool
-        
-        # Initialize pool if needed
-        db_pool = DatabasePool()
+        # Use the shared database pool (initialized once, reused across requests)
+        from app.core.database_pool import db_pool
+
         await db_pool.initialize()
         
         if db_pool.session_factory:
@@ -87,23 +85,6 @@ async def calculate_total_revenue(property_id: str, tenant_id: str) -> Dict[str,
             
     except Exception as e:
         print(f"Database error for {property_id} (tenant: {tenant_id}): {e}")
-        
-        # Create property-specific mock data for testing when DB is unavailable
-        # This ensures each property shows different figures
-        mock_data = {
-            'prop-001': {'total': '1000.00', 'count': 3},
-            'prop-002': {'total': '4975.50', 'count': 4}, 
-            'prop-003': {'total': '6100.50', 'count': 2},
-            'prop-004': {'total': '1776.50', 'count': 4},
-            'prop-005': {'total': '3256.00', 'count': 3}
-        }
-        
-        mock_property_data = mock_data.get(property_id, {'total': '0.00', 'count': 0})
-        
-        return {
-            "property_id": property_id,
-            "tenant_id": tenant_id, 
-            "total": mock_property_data['total'],
-            "currency": "USD",
-            "count": mock_property_data['count']
-        }
+
+        # Never serve fabricated figures for financial data - surface the failure instead
+        raise
